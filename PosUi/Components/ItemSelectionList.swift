@@ -11,12 +11,16 @@ struct ItemSelectionList: View {
     var category: Category
     @State private var selectedItem: MenuItem? = nil
     @EnvironmentObject var orderVM: OrderViewModel
+  
+    @State var showAddItemSheet: Bool = false
     
     var body: some View {
         List {
             ForEach(category.Items, id: \.Name) { item in
                 Button{
+                    
                     selectedItem = item
+                    showAddItemSheet = true
                 }
                 label: {
                     ItemButton(category: category, item: item)
@@ -25,11 +29,15 @@ struct ItemSelectionList: View {
         }
         
         .navigationTitle(Text("Order: \(orderVM.selectedOrder?.orderNumber ?? 0) - \(category.Name)"))
-        .sheet(item: $selectedItem) { item in
-              if orderVM.selectedOrder != nil {
-                  ItemSelection(item: item, orderVM: orderVM)
-              }
-          }
+        .sheet(item: $selectedItem) {item in
+            EditMenuItemSelection(item: item, selectedItem: MenuItemSelection(Item: item, Quantity: 0, SpecialInstructions: ""),
+            onUpdate: { updatedSelection in
+                orderVM.selectedOrder?.addMenuItemSelection(updatedSelection)
+                selectedItem = nil
+            }, onCancel: {
+                selectedItem = nil
+            })
+        }
     }
         
 }

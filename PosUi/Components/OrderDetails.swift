@@ -11,11 +11,18 @@ struct OrderDetails: View {
       @ObservedObject var order: Order
 
       var body: some View {
-          Text("Order")
-          LazyVStack(spacing:50) {
-              ForEach(order.menuItemSelections, id: \.Item.id) { item in
-                  OrderItem(orderItem: item)
+          Text("Order: \(order.orderNumber) \(order.customerName ?? "No Name") - Table: \(order.table ?? "No Table")")
+          List{
+              ForEach(order.menuItemSelections, id: \.id) { item in
+                  OrderItem(menuItemSelection: item, order: order)
               }
+              VStack(alignment: .trailing){
+                  Text("Subtotal: \(order.subtotal(), specifier: "%.2f")")
+                  Text("Tax: \(order.taxTotal(), specifier: "%.2f")")
+                  Text("Total: \(order.total(), specifier: "%.2f")")
+              }
+              .frame(maxWidth: .infinity, alignment: .trailing)
+              .padding(.trailing, 20)
           }
           .frame(minWidth: 500)
       }

@@ -43,7 +43,6 @@ struct OrdersView: View {
                     .toolbar(removing: .sidebarToggle)
             }
             .onAppear{categoriesVM.fetchCategories()}
-            .navigationTitle(Text("Categories"))
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("New Order") {
@@ -74,9 +73,7 @@ struct OrdersView: View {
             
         } detail: {
             if let selectedOrder = ordersVM.selectedOrder {
-                ScrollView{
-                    OrderDetails(order: selectedOrder)
-                }
+                OrderDetails(order: selectedOrder)
               } else {
                   Text("No order selected")
                       .foregroundColor(.secondary)
