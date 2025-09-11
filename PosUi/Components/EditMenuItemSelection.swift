@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 
 
@@ -27,37 +28,51 @@ struct EditMenuItemSelection: View {
   
     
     var body: some View {
-        VStack(spacing: 20) {
-            Text(item.Name)
-                .font(.title)
-            Text("$\(item.Price, specifier: "%.2f")")
-                .font(.title2)
-                .foregroundColor(.secondary)
-            Spacer()
-            HStack {
-                Button("-") {
-                    if selectedItem.quantity > 0 {
-                        selectedItem.quantity -= 1
+        NavigationView {
+            ScrollView {
+                VStack(spacing: 20) {
+                    // Header Section
+                    VStack(spacing: 8) {
+                        Text(item.Name)
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                        Text("$\(item.Price, specifier: "%.2f")")
+                            .font(.title3)
+                            .foregroundColor(.secondary)
                     }
-                }
-                .frame(width: 50, height: 50)
-                .background(selectedItem.quantity > 0 ? Color.red : Color.gray)
-                .foregroundColor(.white)
-                .cornerRadius(8)
-                .disabled(selectedItem.quantity == 0)
-                
-                Text("\(selectedItem.quantity)")
-                    .font(.title)
-                    .frame(minWidth: 50)
-                
-                Button("+") {
-                    selectedItem.quantity += 1
-                }
-                .frame(width: 50, height: 50)
-                .background(Color.blue)
-                .foregroundColor(.white)
-                .cornerRadius(8)
-            }
+                    .padding(.top)
+                    
+                    // Quantity Section
+                    VStack(spacing: 12) {
+                        Text("Quantity")
+                            .font(.headline)
+                        
+                        HStack(spacing: 20) {
+                            Button("-") {
+                                if selectedItem.quantity > 0 {
+                                    selectedItem.quantity -= 1
+                                }
+                            }
+                            .frame(width: 50, height: 50)
+                            .background(selectedItem.quantity > 0 ? Color.red : Color.gray)
+                            .foregroundColor(.white)
+                            .cornerRadius(8)
+                            .disabled(selectedItem.quantity == 0)
+                            
+                            Text("\(selectedItem.quantity)")
+                                .font(.title2)
+                                .fontWeight(.semibold)
+                                .frame(minWidth: 50)
+                            
+                            Button("+") {
+                                selectedItem.quantity += 1
+                            }
+                            .frame(width: 50, height: 50)
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(8)
+                        }
+                    }
             
             // Modifiers Section
             if !selectedItem.getMenuItemModifiers().isEmpty {
@@ -94,41 +109,76 @@ struct EditMenuItemSelection: View {
                 }
             }
             
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Special Instructions")
-                    .font(.headline)
-                TextField("Enter special instructions", text: $selectedItem.specialInstructions)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .frame(height: 44)
-            }
-            
-            Spacer()
-            HStack(spacing: 20) {
-                Button("Cancel") {
-                    onCancel()
-                }
-                .frame(maxWidth: .infinity)
-                .frame(height: 50)
-                .background(Color.gray)
-                .foregroundColor(.white)
-                .cornerRadius(8)
-                
-                Button("OK") {
-                    if(selectedItem.quantity > 0){
-                        onUpdate(selectedItem)
-                    }else {
-                        print("Quantity is 0, not dismissing")
+                    // Special Instructions Section
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Special Instructions")
+                            .font(.headline)
+                        TextField("Enter special instructions", text: $selectedItem.specialInstructions)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .frame(height: 44)
                     }
                     
+                    // Bottom padding for scroll content
+                    Spacer(minLength: 100)
                 }
-                .disabled(selectedItem.quantity < 1)
-                .frame(maxWidth: .infinity)
-                .frame(height: 50)
-                .background(Color.blue)
-                .foregroundColor(.white)
-                .cornerRadius(8)
+                .padding(.horizontal)
+            }
+            .navigationTitle("Customize Item")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        onCancel()
+                    }
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Add to Order") {
+                        if selectedItem.quantity > 0 {
+                            onUpdate(selectedItem)
+                        }
+                    }
+                    .disabled(selectedItem.quantity < 1)
+                    .fontWeight(.semibold)
+                }
             }
         }
+        .overlay(
+            // Sticky bottom buttons for larger screens
+            VStack {
+                Spacer()
+                if UIDevice.current.userInterfaceIdiom == .pad {
+                    HStack(spacing: 20) {
+                        Button("Cancel") {
+                            onCancel()
+                        }
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 50)
+                        .background(Color(.systemGray4))
+                        .foregroundColor(.primary)
+                        .cornerRadius(10)
+                        
+                        Button("Add to Order") {
+                            if selectedItem.quantity > 0 {
+                                onUpdate(selectedItem)
+                            }
+                        }
+                        .disabled(selectedItem.quantity < 1)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 50)
+                        .background(selectedItem.quantity > 0 ? Color.blue : Color(.systemGray4))
+                        .foregroundColor(selectedItem.quantity > 0 ? .white : .secondary)
+                        .cornerRadius(10)
+                        .fontWeight(.semibold)
+                    }
+                    .padding()
+                    .background(
+                        Rectangle()
+                            .fill(.regularMaterial)
+                            .ignoresSafeArea(edges: .bottom)
+                    )
+                }
+            }
+        )
     }
 }
 
